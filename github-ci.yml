@@ -1,0 +1,35 @@
+image: docker:stable
+services:
+    - name: docker:dind
+variables:
+    IMAGE_NAME: bhagya/demo-app
+    IMAGE_TAG: python-app-1.0
+    DOCKER_TLS_CERTDIR: ""
+
+stages:
+    - deploy
+    - build
+
+build-job:
+    stage: build
+    services:
+        - docker:dind
+    image: 
+        name: docker:stable
+    before_script:
+        - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER_NAME" --password-stdin
+    script: 
+        - docker build -t bhagya/demo-app:python-app-1.0 .
+        - docker push bhagya/demo-app:python-app-1.0
+
+deploy:
+    stage: deploy
+    before_script: 
+        - echo $SSH_KEY
+        - chmod 400 $SSH_KEY
+        - cat $SSH_KEY
+    script:
+        - ssh -o StrictHostKeyChecking=no -i $SSH_KEY ubuntu@184.73.38.93"
+            echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USER_NAME" --password-stdin &&
+            docker ps -aq | xargs docker stop | xargs docker rm &&
+            docker run -d -p 80:80 $IMAGE_NAME:$IMAGE_TAG && docker ps"
