@@ -2,7 +2,7 @@ image: docker:stable
 services:
     - name: docker:dind
 variables:
-    IMAGE_NAME: bhagya/demo-app
+    IMAGE_NAME: portfolio/demo-app
     IMAGE_TAG: python-app-1.0
     DOCKER_TLS_CERTDIR: ""
 
